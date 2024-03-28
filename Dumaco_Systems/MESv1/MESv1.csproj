@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="Ridder.Client.SDK">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Ridder iQ Client\Bin\Ridder.Client.SDK.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
