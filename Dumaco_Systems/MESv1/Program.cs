@@ -1,4 +1,6 @@
-﻿using Ridder.Client.SDK;
+﻿using ADODB;
+using Ridder.Client.SDK;
+using Ridder.Client.SDK.SDKDataAcces;
 
 namespace MESv1
 {
@@ -9,6 +11,9 @@ namespace MESv1
             Console.WriteLine("Hello, World!");
             RidderIQSDK application = new RidderIQSDK();
             ISDKResult loginResult = application.Login("Username", "Password", "Company");
+            SDKRecordset recordset = application.CreateRecordset("test", "test", "test", "test");
+            recordset.MoveFirst();
+            Field field = recordset.GetField("Code");
         }
     }
 }

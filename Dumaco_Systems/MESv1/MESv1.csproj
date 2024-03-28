@@ -8,6 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="ADODB">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Ridder iQ Client\Bin\adodb.dll</HintPath>
+    </Reference>
     <Reference Include="Ridder.Client.SDK">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Ridder iQ Client\Bin\Ridder.Client.SDK.dll</HintPath>
     </Reference>
