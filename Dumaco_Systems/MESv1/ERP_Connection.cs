@@ -14,27 +14,37 @@ namespace MESv1
         private const string username = "Administrator";
         private const string password = "perron_ad";
         private const string company = "Perron038";
-        private bool connected = false;
-        private RidderIQSDK application;
+        private readonly RidderIQSDK application = new RidderIQSDK();
 
         public bool Connect()
         {
-            application = new RidderIQSDK();
+            if (application.LoggedinAndConnected)
+            {
+                return true;
+            }
             ISDKResult loginResult = application.Login(username, password, company);
             if (!loginResult.HasError)
             {
-                connected = true;
+                //connected = true;
             }
-            return connected;
+            return application.LoggedinAndConnected;
+        }
+        private void Disconnect()
+        {
+            if (application.LoggedinAndConnected)
+            {
+                application.Logout();
+            }
         }
 
-        // Get values from table. Problems: fieldName and columnName are the same if only one column is selected, otherwise this is a bad implementation
-        public object[] GetValues(string tableName, string fieldName, string? columName = "", string? filterName = "", string? sortName = "")
+        // Get values from table froms specified colum.
+        public object[] GetValues(string tableName, string columName, string? filterName = "", string? sortName = "")
         {
-            if (!connected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(fieldName))
+            if (!application.LoggedinAndConnected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(columName))
             {
                 return new object[0];
             }
+
             SDKRecordset recordSet = application.CreateRecordset(tableName, columName, filterName, sortName);
             int amountOfRecords = recordSet.RecordCount;
             object[] data = new object[amountOfRecords];
@@ -43,7 +53,7 @@ namespace MESv1
             SDKRowData rowData = recordSet.GetCurrentRow();
             while (!recordSet.EOF && i < amountOfRecords)
             {
-                data[i++] = recordSet.GetField(fieldName).Value;
+                data[i++] = recordSet.GetField(columName).Value;
                 recordSet.MoveNext();
             }
             return data;
@@ -52,7 +62,7 @@ namespace MESv1
         // Update first value in table with filter
         public void UpdateValue(string tableName, string fieldName, object value, string filterName)
         {
-            if (!connected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(fieldName) || value is null)
+            if (!application.LoggedinAndConnected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(fieldName) || value is null)
             {
                 return;
             }
@@ -70,7 +80,7 @@ namespace MESv1
         // Update values in table with the same filter
         public void UpdateValues(string tableName, string fieldName, object value, string filterName)
         {
-            if (!connected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(fieldName))
+            if (!application.LoggedinAndConnected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(fieldName))
             {
                 return;
             }
@@ -87,7 +97,7 @@ namespace MESv1
         // Add values to table
         public void AddValues(string tableName, string[] fieldNames, object[] values)
         {
-            if (!connected || string.IsNullOrWhiteSpace(tableName) || fieldNames is null || values is null)
+            if (!application.LoggedinAndConnected || string.IsNullOrWhiteSpace(tableName) || fieldNames is null || values is null)
             {
                 return;
             }
@@ -113,7 +123,7 @@ namespace MESv1
         // Delete first value in table with filter
         public void DeleteValue(string tableName, string filterName)
         {
-            if (!connected || string.IsNullOrWhiteSpace(tableName))
+            if (!application.LoggedinAndConnected || string.IsNullOrWhiteSpace(tableName))
             {
                 return;
             }
@@ -126,7 +136,7 @@ namespace MESv1
         // Delete values in table with the same filter
         public void DeleteValues(string tableName, string filterName)
         {
-            if (!connected || string.IsNullOrWhiteSpace(tableName))
+            if (!application.LoggedinAndConnected || string.IsNullOrWhiteSpace(tableName))
             {
                 return;
             }
@@ -137,15 +147,6 @@ namespace MESv1
             {
                 recordset.Delete();
                 recordset.MoveNext();
-            }
-        }
-
-        private void Disconnect()
-        {
-            if (connected)
-            {
-                application.Logout();
-                connected = false;
             }
         }
     }
