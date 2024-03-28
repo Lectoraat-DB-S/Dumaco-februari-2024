@@ -28,17 +28,19 @@ namespace MESv1
             return connected;
         }
 
-        public object[] GetValues(string tableName, string fieldName, string? collumName = "", string? filterName = "", string? sortName = "")
+        // Get values from table. Problems: fieldName and columnName are the same if only one column is selected, otherwise this is a bad implementation
+        public object[] GetValues(string tableName, string fieldName, string? columName = "", string? filterName = "", string? sortName = "")
         {
             if (!connected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(fieldName))
             {
                 return new object[0];
             }
-            SDKRecordset recordSet = application.CreateRecordset(tableName, collumName, filterName, sortName);
+            SDKRecordset recordSet = application.CreateRecordset(tableName, columName, filterName, sortName);
             int amountOfRecords = recordSet.RecordCount;
             object[] data = new object[amountOfRecords];
             recordSet.MoveFirst();
             int i = 0;
+            SDKRowData rowData = recordSet.GetCurrentRow();
             while (!recordSet.EOF && i < amountOfRecords)
             {
                 data[i++] = recordSet.GetField(fieldName).Value;
@@ -47,6 +49,7 @@ namespace MESv1
             return data;
         }
 
+        // Update first value in table with filter
         public void UpdateValue(string tableName, string fieldName, object value, string filterName)
         {
             if (!connected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(fieldName) || value is null)
@@ -64,6 +67,7 @@ namespace MESv1
             }
         }
 
+        // Update values in table with the same filter
         public void UpdateValues(string tableName, string fieldName, object value, string filterName)
         {
             if (!connected || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(fieldName))
@@ -80,7 +84,8 @@ namespace MESv1
             }
         }
 
-        public void AddValue(string tableName, string[] fieldNames, object[] values)
+        // Add values to table
+        public void AddValues(string tableName, string[] fieldNames, object[] values)
         {
             if (!connected || string.IsNullOrWhiteSpace(tableName) || fieldNames is null || values is null)
             {
@@ -105,6 +110,7 @@ namespace MESv1
             }
         }
 
+        // Delete first value in table with filter
         public void DeleteValue(string tableName, string filterName)
         {
             if (!connected || string.IsNullOrWhiteSpace(tableName))
@@ -115,6 +121,23 @@ namespace MESv1
             SDKRecordset recordset = application.CreateRecordset(tableName, "", filterName, "");
             recordset.MoveFirst();
             recordset.Delete();
+        }
+
+        // Delete values in table with the same filter
+        public void DeleteValues(string tableName, string filterName)
+        {
+            if (!connected || string.IsNullOrWhiteSpace(tableName))
+            {
+                return;
+            }
+
+            SDKRecordset recordset = application.CreateRecordset(tableName, "", filterName, "");
+            recordset.MoveFirst();
+            while (!recordset.EOF)
+            {
+                recordset.Delete();
+                recordset.MoveNext();
+            }
         }
 
         private void Disconnect()
